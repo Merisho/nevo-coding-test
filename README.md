@@ -12,7 +12,7 @@ If you would like to run this from your code, there is the only method: `speedte
 
 ## How it works
 In both speed testing providers, the code sends requests until the timeout is reached. Timeout is configured to be 10 seconds.
-When the timeout is reached, average speed (Mbps) is calculated by all requests that managed to finish in the given time.
+When the timeout is reached, average speed (Mbps) is calculated taking into account only those requests that managed to finish in the given time.
 
 ### Speedtest.net
 Speed testing via Ookla's speedtest.net is implemented with `github.com/showwin/speedtest-go` package.
