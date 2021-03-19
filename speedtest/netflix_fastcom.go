@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"gopkg.in/ddo/go-fast.v0"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -88,6 +87,7 @@ loop:
 func (n *netflixFastCom) upload(url string) chan networkActionResult {
 	resChan := make(chan networkActionResult)
 	var httpClient http.Client
+	httpClient.Timeout = 5 * time.Second
 
 	go func() {
 		u := n.makeUploadURL(url)
@@ -99,7 +99,7 @@ func (n *netflixFastCom) upload(url string) chan networkActionResult {
 		data := make([]byte, uploadSize)
 		req, err := n.createUploadRequest(u, data)
 		if err != nil {
-			log.Fatal(err)
+			resChan <- networkActionResult{0, err}
 		}
 
 		start := time.Now()
