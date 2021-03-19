@@ -1,6 +1,14 @@
 package speedtest
 
-import "github.com/showwin/speedtest-go/speedtest"
+import (
+    "errors"
+    "github.com/showwin/speedtest-go/speedtest"
+    "time"
+)
+
+const (
+    testTimeout = 10 * time.Second
+)
 
 func newOoklaSpeedtestNet() (*ooklaSpeeedtestNet, error) {
     user, err := speedtest.FetchUserInfo()
@@ -28,24 +36,77 @@ type ooklaSpeeedtestNet struct {
 }
 
 func (o *ooklaSpeeedtestNet) Test() (upload, download float64, err error) {
-    var downloadSum float64
-    var uploadSum float64
-
-    for _, s := range o.servers {
-        err = s.UploadTest(false)
-        if err != nil {
-            return 0, 0, err
-        }
-
-        err = s.DownloadTest(false)
-        if err != nil {
-            return 0, 0, err
-        }
-
-        downloadSum += s.DLSpeed
-        uploadSum += s.ULSpeed
+    upload, err = o.testSpeed(o.upload)
+    if err != nil {
+        return 0, 0, err
     }
 
-    l := float64(len(o.servers))
-    return uploadSum / l, downloadSum / l, nil
+    download, err = o.testSpeed(o.download)
+    if err != nil {
+        return 0, 0, err
+    }
+
+    return upload, download, nil
+}
+
+func (o *ooklaSpeeedtestNet) testSpeed(networkAction func(server *speedtest.Server) chan uploadResult) (float64, error) {
+    timeout := time.After(testTimeout)
+    totalExecuted := 0
+    var totalSpeed float64
+    currentServer := 0
+
+    loop:
+        for {
+            select {
+            case <- timeout:
+                if totalExecuted == 0 {
+                    return 0, errors.New("timeout")
+                }
+
+                break loop
+            case res := <- networkAction(o.servers[currentServer]):
+                if res.err != nil {
+                    return 0, res.err
+                }
+
+                totalSpeed += res.speed
+                totalExecuted++
+            }
+
+            currentServer = (currentServer + 1) % len(o.servers)
+        }
+
+    return totalSpeed / float64(totalExecuted), nil
+}
+
+func (o *ooklaSpeeedtestNet) upload(server *speedtest.Server) chan uploadResult  {
+    resChan := make(chan uploadResult)
+
+    go func() {
+        err := server.UploadTest(false)
+        if err != nil {
+            resChan <- uploadResult{0, err}
+            return
+        }
+
+        resChan <- uploadResult{server.ULSpeed, nil}
+    }()
+
+    return resChan
+}
+
+func (o *ooklaSpeeedtestNet) download(server *speedtest.Server) chan uploadResult  {
+    resChan := make(chan uploadResult)
+
+    go func() {
+        err := server.DownloadTest(false)
+        if err != nil {
+            resChan <- uploadResult{0, err}
+            return
+        }
+
+        resChan <- uploadResult{server.DLSpeed, nil}
+    }()
+
+    return resChan
 }
