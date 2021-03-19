@@ -123,27 +123,6 @@ func (n *netflixFastCom) upload(url string) chan networkActionResult {
     return resChan
 }
 
-func (n *netflixFastCom) testDownloadSpeed() (float64, error) {
-    kbpsChan := make(chan float64)
-
-    var downloaded float64
-    var count float64
-    go func() {
-        for kbps := range kbpsChan {
-            count++
-            mbps := kbps / 1000
-            downloaded += mbps
-        }
-    }()
-
-    err := n.fastCom.Measure(n.servers, kbpsChan)
-    if err != nil {
-        return 0, err
-    }
-
-    return downloaded / count, nil
-}
-
 func (n *netflixFastCom) createUploadRequest(url string, data []byte) (*http.Request, error) {
     req, err := http.NewRequest("POST", url, bytes.NewReader(data))
     if err != nil {
@@ -164,4 +143,25 @@ func (n *netflixFastCom) makeUploadURL(u string) string {
     }
 
     return p[0] + "/range/0-26214400?" + p[1]
+}
+
+func (n *netflixFastCom) testDownloadSpeed() (float64, error) {
+    kbpsChan := make(chan float64)
+
+    var downloaded float64
+    var count float64
+    go func() {
+        for kbps := range kbpsChan {
+            count++
+            mbps := kbps / 1000
+            downloaded += mbps
+        }
+    }()
+
+    err := n.fastCom.Measure(n.servers, kbpsChan)
+    if err != nil {
+        return 0, err
+    }
+
+    return downloaded / count, nil
 }
