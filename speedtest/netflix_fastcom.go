@@ -34,11 +34,13 @@ func newNetflixFastCom() (*netflixFastCom, error) {
 	}, nil
 }
 
+// netflixFastCom implements SpeedTester interface by performing speed testing via fast.com
 type netflixFastCom struct {
 	fastCom *fast.Fast
 	servers []string
 }
 
+// Test performs speed testing via fast.com and returns upload, download speeds
 func (n *netflixFastCom) Test() (upload, download float64, err error) {
 	upload, err = n.testUploadSpeed()
 	if err != nil {
@@ -56,7 +58,7 @@ func (n *netflixFastCom) Test() (upload, download float64, err error) {
 func (n *netflixFastCom) testUploadSpeed() (float64, error) {
 	var totalSpeed float64
 	totalExecuted := 0
-	timeout := time.After(10 * time.Second)
+	timeout := time.After(testTimeout)
 	currentServer := 0
 
 loop:
@@ -87,7 +89,7 @@ loop:
 func (n *netflixFastCom) upload(url string) chan networkActionResult {
 	resChan := make(chan networkActionResult)
 	var httpClient http.Client
-	httpClient.Timeout = 5 * time.Second
+	httpClient.Timeout = testTimeout
 
 	go func() {
 		u := n.makeUploadURL(url)

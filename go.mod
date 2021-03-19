@@ -1,4 +1,4 @@
-module nevo-coding-test
+module github.com/merisho/nevo-coding-test
 
 go 1.16
 

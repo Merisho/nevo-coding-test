@@ -2,8 +2,8 @@ package main
 
 import (
     "fmt"
+    "github.com/merisho/nevo-coding-test/speedtest"
     "log"
-    "nevo-coding-test/speedtest"
 )
 
 func main() {

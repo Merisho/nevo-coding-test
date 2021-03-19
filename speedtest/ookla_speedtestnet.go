@@ -6,10 +6,6 @@ import (
 	"time"
 )
 
-const (
-	testTimeout = 10 * time.Second
-)
-
 func newOoklaSpeedtestNet() (*ooklaSpeeedtestNet, error) {
 	user, err := speedtest.FetchUserInfo()
 	if err != nil {
@@ -31,10 +27,12 @@ func newOoklaSpeedtestNet() (*ooklaSpeeedtestNet, error) {
 	}, nil
 }
 
+// ooklaSpeeedtestNet implements SpeedTester interface by performing speed testing via speedtest.net
 type ooklaSpeeedtestNet struct {
 	servers speedtest.Servers
 }
 
+// Test performs speed testing via speedtest.net and returns upload, download speeds
 func (o *ooklaSpeeedtestNet) Test() (upload, download float64, err error) {
 	upload, err = o.testSpeed(o.upload)
 	if err != nil {
