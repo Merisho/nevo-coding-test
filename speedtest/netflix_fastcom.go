@@ -85,19 +85,14 @@ func (n *netflixFastCom) testUploadSpeed() (float64, error) {
     return totalSpeed / float64(totalExecuted), nil
 }
 
-type uploadResult struct {
-    speed float64
-    err error
-}
-
-func (n *netflixFastCom) upload(url string) chan uploadResult {
-    resChan := make(chan uploadResult)
+func (n *netflixFastCom) upload(url string) chan networkActionResult {
+    resChan := make(chan networkActionResult)
     var httpClient http.Client
 
     go func() {
         u := n.makeUploadURL(url)
         if u == "" {
-            resChan <- uploadResult{0, fmt.Errorf("invalid url %s", url)}
+            resChan <- networkActionResult{0, fmt.Errorf("invalid url %s", url)}
             return
         }
 
@@ -111,17 +106,17 @@ func (n *netflixFastCom) upload(url string) chan uploadResult {
         res, err := httpClient.Do(req)
         duration := time.Now().Sub(start).Seconds()
         if err != nil {
-            resChan <- uploadResult{0, err}
+            resChan <- networkActionResult{0, err}
             return
         }
 
         if res.StatusCode != 200 {
-            resChan <- uploadResult{0, errors.New("fast.com response code is not 200")}
+            resChan <- networkActionResult{0, errors.New("fast.com response code is not 200")}
             return
         }
 
         dataMegabits := float64(len(data) * 8) / 1000000
-        resChan <- uploadResult{dataMegabits / duration, nil}
+        resChan <- networkActionResult{dataMegabits / duration, nil}
         return
     }()
 

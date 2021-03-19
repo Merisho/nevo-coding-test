@@ -11,6 +11,11 @@ type SpeedTester interface {
     Test() (upload, download float64, err error)
 }
 
+type networkActionResult struct {
+    speed float64
+    err error
+}
+
 func Test(p Provider) (upload, download float64, err error) {
     if p == SpeedtestNet {
         speedtest, err := newOoklaSpeedtestNet()

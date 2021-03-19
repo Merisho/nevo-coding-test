@@ -12,7 +12,18 @@ func TestNetflixFastCom_upload(t *testing.T) {
 
     upload, err := st.testUploadSpeed()
     assert.NoError(t, err)
-    //assert.Greater(t, upload, float64(0))
+    assert.Greater(t, upload, float64(0))
 
-    fmt.Println(upload)
+    fmt.Println("Fast.com upload speed:", upload)
+}
+
+func TestNetflixFastCom_download(t *testing.T) {
+    st, err := newNetflixFastCom()
+    assert.NoError(t, err)
+
+    download, err := st.testDownloadSpeed()
+    assert.NoError(t, err)
+    assert.Greater(t, download, float64(0))
+
+    fmt.Println("Fast.com download speed:", download)
 }

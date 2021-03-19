@@ -49,7 +49,7 @@ func (o *ooklaSpeeedtestNet) Test() (upload, download float64, err error) {
     return upload, download, nil
 }
 
-func (o *ooklaSpeeedtestNet) testSpeed(networkAction func(server *speedtest.Server) chan uploadResult) (float64, error) {
+func (o *ooklaSpeeedtestNet) testSpeed(networkAction func(server *speedtest.Server) chan networkActionResult) (float64, error) {
     timeout := time.After(testTimeout)
     totalExecuted := 0
     var totalSpeed float64
@@ -79,33 +79,33 @@ func (o *ooklaSpeeedtestNet) testSpeed(networkAction func(server *speedtest.Serv
     return totalSpeed / float64(totalExecuted), nil
 }
 
-func (o *ooklaSpeeedtestNet) upload(server *speedtest.Server) chan uploadResult  {
-    resChan := make(chan uploadResult)
+func (o *ooklaSpeeedtestNet) upload(server *speedtest.Server) chan networkActionResult {
+    resChan := make(chan networkActionResult)
 
     go func() {
         err := server.UploadTest(false)
         if err != nil {
-            resChan <- uploadResult{0, err}
+            resChan <- networkActionResult{0, err}
             return
         }
 
-        resChan <- uploadResult{server.ULSpeed, nil}
+        resChan <- networkActionResult{server.ULSpeed, nil}
     }()
 
     return resChan
 }
 
-func (o *ooklaSpeeedtestNet) download(server *speedtest.Server) chan uploadResult  {
-    resChan := make(chan uploadResult)
+func (o *ooklaSpeeedtestNet) download(server *speedtest.Server) chan networkActionResult {
+    resChan := make(chan networkActionResult)
 
     go func() {
         err := server.DownloadTest(false)
         if err != nil {
-            resChan <- uploadResult{0, err}
+            resChan <- networkActionResult{0, err}
             return
         }
 
-        resChan <- uploadResult{server.DLSpeed, nil}
+        resChan <- networkActionResult{server.DLSpeed, nil}
     }()
 
     return resChan
