@@ -6,24 +6,26 @@ import (
     "testing"
 )
 
-func TestNetflixFastCom_upload(t *testing.T) {
-    st, err := newNetflixFastCom()
+func TestNetflixFastCom(t *testing.T) {
+    speedtest, err := newNetflixFastCom()
     assert.NoError(t, err)
 
-    upload, err := st.testUploadSpeed()
+    upload, download, err := speedtest.Test()
     assert.NoError(t, err)
     assert.Greater(t, upload, float64(0))
-
-    fmt.Println("Fast.com upload speed:", upload)
-}
-
-func TestNetflixFastCom_download(t *testing.T) {
-    st, err := newNetflixFastCom()
-    assert.NoError(t, err)
-
-    download, err := st.testDownloadSpeed()
-    assert.NoError(t, err)
     assert.Greater(t, download, float64(0))
 
-    fmt.Println("Fast.com download speed:", download)
+    fmt.Println("Fast.com upload and download speeds:", upload, download)
+}
+
+func TestNetflixFastComInvalidURL(t *testing.T) {
+    speedtest, err := newNetflixFastCom()
+    assert.NoError(t, err)
+
+    speedtest.servers = []string{"invalid-url.com"}
+
+    upload, download, err := speedtest.Test()
+    assert.EqualError(t, err, "invalid url invalid-url.com")
+    assert.Equal(t, upload, float64(0))
+    assert.Equal(t, download, float64(0))
 }

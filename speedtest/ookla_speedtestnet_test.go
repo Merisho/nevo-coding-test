@@ -6,24 +6,14 @@ import (
     "testing"
 )
 
-func TestOoklaSpeeedtestNet_upload(t *testing.T) {
-    st, err := newOoklaSpeedtestNet()
+func TestOoklaSpeedtestNet(t *testing.T) {
+    speedtest, err := newOoklaSpeedtestNet()
     assert.NoError(t, err)
 
-    upload, err := st.testSpeed(st.upload)
+    upload, download, err := speedtest.Test()
     assert.NoError(t, err)
     assert.Greater(t, upload, float64(0))
-
-    fmt.Println("Speedtest.net upload speed:", upload)
-}
-
-func TestOoklaSpeeedtestNet_download(t *testing.T) {
-    st, err := newOoklaSpeedtestNet()
-    assert.NoError(t, err)
-
-    download, err := st.testSpeed(st.download)
-    assert.NoError(t, err)
     assert.Greater(t, download, float64(0))
 
-    fmt.Println("Speedtest.net download speed:", download)
+    fmt.Println("Speedtest.net upload and download speeds:", upload, download)
 }
